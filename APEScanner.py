@@ -61,8 +61,6 @@ class scanner:
 
                 else:
                     self.__State=ScanningState.Other
-
-
             elif self.__State==ScanningState.End:
                 #resetting tokenizer values
                 tokenvalue=''
@@ -71,7 +69,7 @@ class scanner:
             elif self.__State==ScanningState.Identifier:
                 if len(code)-self.__scanningIndex>1:# guard condition in order not to scan out of boundary
                     if((code[self.__scanningIndex]in ['o','O'])\
-                        and (code[self.__scanningIndex]in ['u','U'])): # checking for comments
+                        and (code[self.__scanningIndex+1]in ['u','U'])): # checking for comments
                         self.__State=ScanningState.Comment
                         self.__scanningIndex+=2
                     else:
@@ -147,6 +145,7 @@ class scanner:
                     self.__scanningIndex+=1
 
                 tokenvalue+='"'
+                self.__scanningIndex+=1
 
                 tokentype='string'
 
@@ -161,11 +160,13 @@ class scanner:
                     if(code[self.__scanningIndex]=='\n'):
 
                         self.__linenumber+=1
+                        self.__scanningIndex+=1
 
                     if((code[self.__scanningIndex]in ['u','U'])\
-                        and (code[self.__scanningIndex]in ['o','O'])): # checking for comments endings
+                        and (code[self.__scanningIndex+1]in ['o','O'])): # checking for comments endings
                         commentclosed=True
                     self.__scanningIndex+=1
+                    self.__State=ScanningState.End
                 if(not commentclosed):
                     raise ('comment started at {} was not closed and left open till {}'\
                         .format(commentstart,self.__linenumber))
@@ -274,8 +275,9 @@ class Token:
         self.value=value
     def __str__(self):
         return 'Token of type {} and value {}'.format(self.type,self.value)
-st='omar12  lala when else familyof 1.2222    ou this is a comment uo "string val" panic listen within when do ; and or [ } ( := !='
+st='omar12  lala when else familyof 1.2222       "str"   "string val" panic listen within when do ; and or [ } ( := !='
 myscanner=scanner()
+#print(st[122])
 myscanner.scan(st)
 ls=myscanner.getTokensList()
 print(type(ls))
