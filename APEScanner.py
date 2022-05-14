@@ -271,7 +271,7 @@ class Token:
         self.value=value
     def __str__(self):
         return 'Token of type {} and value {}'.format(self.type,self.value)
-st='omar12  lala when else familyof 1.2222  panic listen within when do ; and or [ } ( := !='
+st='omar12  lala when else familyof 1.2222  panic listen within when do ; and or [ } ( := != < >= <='
 myscanner=scanner()
 myscanner.scan(st)
 ls=myscanner.getTokensList()
