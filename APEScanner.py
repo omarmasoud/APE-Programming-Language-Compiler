@@ -44,7 +44,7 @@ class scanner:
                 elif code[self.__scanningIndex] in self.__letters:
                     self.__State=ScanningState.Identifier
 
-                elif code[self.__scanningIndex] == '"':
+                elif code[self.__scanningIndex] == '\"':
                     self.__State=ScanningState.String
 
                 elif code[self.__scanningIndex] == ':':
@@ -142,7 +142,7 @@ class scanner:
 
                 tokenvalue='"'
 
-                while((self.__scanningIndex<len(code)) and code[self.__scanningIndex]!='"'):
+                while((self.__scanningIndex<len(code)) and code[self.__scanningIndex]!='\"'):
                     tokenvalue+=code[self.__scanningIndex]
                     self.__scanningIndex+=1
 
@@ -274,7 +274,7 @@ class Token:
         self.value=value
     def __str__(self):
         return 'Token of type {} and value {}'.format(self.type,self.value)
-st='omar12  lala when else familyof 1.2222    ou this is a comment uo  panic listen within when do ; and or [ } ( := !='
+st='omar12  lala when else familyof 1.2222    ou this is a comment uo "string val" panic listen within when do ; and or [ } ( := !='
 myscanner=scanner()
 myscanner.scan(st)
 ls=myscanner.getTokensList()
