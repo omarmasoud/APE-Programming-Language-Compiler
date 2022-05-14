@@ -1,6 +1,6 @@
 import enum
 import string
-
+from settings import TokensTypes
 class scanner:
     def __init__(self) :
         self.__scanningIndex=0
@@ -80,11 +80,11 @@ class scanner:
                             tokenvalue+=code[self.__scanningIndex]
                             self.__scanningIndex+=1
                         if tokenvalue.lower() in self.__reserved_keywords:
-                            tokentype='reserved_keyword'
+                            tokentype=TokensTypes.reserved_keyword
                         elif tokenvalue.lower() in self.__logical_operators:
-                            tokentype='logical_operator'
+                            tokentype=TokensTypes.logical_operator
                         else:
-                            tokentype='identifier'
+                            tokentype=TokensTypes.identifier
 
                         self.__tokens.append(Token(Tokentype=tokentype,value=tokenvalue))
 
@@ -110,7 +110,7 @@ class scanner:
                 if (self.__scanningIndex<len(code) and code[self.__scanningIndex] != ' '):
                     raise('unexpected token {} at line {} '.format(code[self.__scanningIndex] ,self.__linenumber))
 
-                tokentype='number'
+                tokentype=TokensTypes.number
 
                 self.__tokens.append(Token(Tokentype=tokentype,value=tokenvalue))
 
@@ -122,7 +122,7 @@ class scanner:
 
                         tokenvalue=':='
 
-                        tokentype='assignmentoperator'
+                        tokentype=TokensTypes.assignmentoperator
 
                         self.__scanningIndex+=2
 
@@ -147,7 +147,7 @@ class scanner:
                 tokenvalue+='"'
                 self.__scanningIndex+=1
 
-                tokentype='string'
+                tokentype=TokensTypes.string
 
                 self.__tokens.append(Token(Tokentype=tokentype,value=tokenvalue))
 
@@ -179,23 +179,23 @@ class scanner:
                 positionedcharacter=code[self.__scanningIndex]
                 if positionedcharacter in self.__special_characters:
                     if positionedcharacter==';':
-                        tokentype='semicolon'
+                        tokentype=TokensTypes.semicolon
                     elif positionedcharacter=='.':
-                        tokentype='dot'
+                        tokentype=TokensTypes.dot
                     elif positionedcharacter=='{':
-                        tokentype='leftcurlybracket'
+                        tokentype=TokensTypes.leftcurlybracket
                     elif positionedcharacter=='}':
-                        tokentype='rightcurlybracket'
+                        tokentype=TokensTypes.rightcurlybracket
                     elif positionedcharacter=='(':
-                        tokentype='leftbracket'
+                        tokentype=TokensTypes.leftbracket
                     elif positionedcharacter==')':
-                        tokentype='rightbracket'
+                        tokentype=TokensTypes.rightbracket
                     elif positionedcharacter=='[':
-                        tokentype='leftsquarebracket'
+                        tokentype=TokensTypes.leftsquarebracket
                     elif positionedcharacter==']':
-                        tokentype='rightsquarebracket'
+                        tokentype=TokensTypes.rightsquarebracket
                     elif positionedcharacter==',':
-                        tokentype='comma'
+                        tokentype=TokensTypes.comma
 
                     self.__scanningIndex+=1
                     tokenvalue=positionedcharacter
@@ -203,13 +203,13 @@ class scanner:
 
                 elif positionedcharacter in self.__arithmetic_operators:
                     if positionedcharacter=='+':
-                        tokentype='additionoperator'
+                        tokentype=TokensTypes.additionoperator
                     elif positionedcharacter=='-':
-                        tokentype='subtractionoperator'
+                        tokentype=TokensTypes.subtractionoperator
                     elif positionedcharacter=='*':
-                        tokentype='multiplicationoperator'
+                        tokentype=TokensTypes.multiplicationoperator
                     elif positionedcharacter=='/':
-                        tokentype='divisionoperator'
+                        tokentype=TokensTypes.divisionoperator
                     pass
                     self.__scanningIndex+=1
                     tokenvalue=positionedcharacter
@@ -218,33 +218,33 @@ class scanner:
                 elif positionedcharacter in self.__comparison_operators:
                     if positionedcharacter=='=':
                         tokenvalue='='
-                        tokentype='equaloperator'
+                        tokentype=TokensTypes.equaloperator
                         self.__scanningIndex+=1
                     elif positionedcharacter=='!':
                         if(self.__scanningIndex+1<len(code)):
                             if(code[self.__scanningIndex+1]=='='):
                                 tokenvalue='!='
-                                tokentype='notequaloperator'
+                                tokentype=TokensTypes.notequaloperator
                                 self.__scanningIndex+=2
                         else:
                             raise('at line {} expected = after !'.format(self.__linenumber))
                     elif positionedcharacter=='<':
                         tokenvalue='<'
-                        tokentype='lessthanoperator'
+                        tokentype=TokensTypes.lessthanoperator
                         if(self.__scanningIndex+1<len(code)):
                             if(code[self.__scanningIndex+1]=='='):
                                 tokenvalue+='='
-                                tokentype='lessthanorequaloperator'
+                                tokentype=TokensTypes.lessthanorequaloperator
                                 self.__scanningIndex+=2
                             else:
                                 self.__scanningIndex+=1
                     elif positionedcharacter=='>':
                         tokenvalue='>'
-                        tokentype='greaterthanoperator'
+                        tokentype=TokensTypes.greaterthanoperator
                         if(self.__scanningIndex+1<len(code)):
                             if(code[self.__scanningIndex+1]=='='):
                                 tokenvalue+='='
-                                tokentype='greaterthanorequaloperator'
+                                tokentype=TokensTypes.greaterthanorequaloperator
                                 self.__scanningIndex+=2
                             else:
                                 self.__scanningIndex+=1
