@@ -58,11 +58,11 @@ class scanner:
                 elif code[self.__scanningIndex] == ' ':
                     self.__scanningIndex+=1
                     self.__State=ScanningState.Start
-                     
+
                 else:
                     self.__State=ScanningState.Other
 
-        
+
             elif self.__State==ScanningState.End:
                 #resetting tokenizer values
                 tokenvalue=''
@@ -99,7 +99,7 @@ class scanner:
                         tokenvalue+=code[self.__scanningIndex]
                         self.__scanningIndex+=1
                 #decimal numbers
-                if code[self.__scanningIndex] == '.':
+                if (self.__scanningIndex<len(code) and code[self.__scanningIndex] == '.'):
 
                     tokenvalue+='.'
                     self.__scanningIndex+=1
@@ -139,11 +139,11 @@ class scanner:
 
                 tokenvalue='"'
 
-                while((self.__scanningIndex<len(code)) and code[self.__scanningIndex]!='"'): 
+                while((self.__scanningIndex<len(code)) and code[self.__scanningIndex]!='"'):
                     tokenvalue+=code[self.__scanningIndex]
                     self.__scanningIndex+=1
 
-                tokenvalue+='"' 
+                tokenvalue+='"'
 
                 tokentype='string'
 
@@ -188,10 +188,10 @@ class scanner:
                         tokentype='leftsquarebracket'
                     elif positionedcharacter==']':
                         tokentype='rightsquarebracket'
-                    
+
                     self.__scanningIndex+=1
                     tokenvalue=positionedcharacter
-                    self.__tokens.append(Token(Tokentype=tokentype,tokenvalue=tokenvalue))
+                    self.__tokens.append(Token(Tokentype=tokentype,value=tokenvalue))
 
                 elif positionedcharacter in self.__arithmetic_operators:
                     if positionedcharacter=='+':
@@ -205,7 +205,7 @@ class scanner:
                     pass
                     self.__scanningIndex+=1
                     tokenvalue=positionedcharacter
-                    self.__tokens.append(Token(Tokentype=tokentype,tokenvalue=tokenvalue))
+                    self.__tokens.append(Token(Tokentype=tokentype,value=positionedcharacter))
 
                 elif positionedcharacter in self.__comparison_operators:
                     if positionedcharacter=='=':
@@ -240,7 +240,7 @@ class scanner:
                             else:
                                 self.__scanningIndex+=1
                     self.__tokens.append(Token(Tokentype=tokentype,tokenvalue=tokenvalue))
-                   
+
                 else:
                     raise('unexpected character {}'.format(positionedcharacter))
                 self.__State=ScanningState.End
@@ -268,13 +268,16 @@ class Token:
     def __init__(self,Tokentype,value):
         self.type=Tokentype
         self.value=value
-st='omar'
+    def __str__(self):
+        return 'Token of type {} and value {}'.format(self.type,self.value)
+st='omar12  lala when else familyof 1.2222  panic listen within when do ; and or [ } ('
 myscanner=scanner()
 myscanner.scan(st)
-ls=myscanner.getTokensList
+ls=myscanner.getTokensList()
+print(type(ls))
 
-for i in range(len(myscanner.getTokensList)):
-    print(myscanner.getTokensList[i])
+for i in range(len(ls)):
+    print(ls[i])
 
 
 
