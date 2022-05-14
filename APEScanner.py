@@ -13,7 +13,7 @@ class scanner:
 
         self.__arithmetic_operators=['+','-','*','/']
 
-        self.__comparison_operators=['>','<','=','<=','>=','!=']
+        self.__comparison_operators=['>','<','=','!']
 
         self.__logical_operators=['and','or','not']
 
@@ -239,10 +239,11 @@ class scanner:
                                 self.__scanningIndex+=2
                             else:
                                 self.__scanningIndex+=1
-                    self.__tokens.append(Token(Tokentype=tokentype,tokenvalue=tokenvalue))
+                    self.__tokens.append(Token(Tokentype=tokentype,value=tokenvalue))
+                    self.__State=ScanningState.End
 
                 else:
-                    raise('unexpected character {}'.format(positionedcharacter))
+                    raise('unexpected character {}'.format(code[self.__scanningIndex]))
                 self.__State=ScanningState.End
 
 
@@ -270,7 +271,7 @@ class Token:
         self.value=value
     def __str__(self):
         return 'Token of type {} and value {}'.format(self.type,self.value)
-st='omar12  lala when else familyof 1.2222  panic listen within when do ; and or [ } ('
+st='omar12  lala when else familyof 1.2222  panic listen within when do ; and or [ } ( := !='
 myscanner=scanner()
 myscanner.scan(st)
 ls=myscanner.getTokensList()
