@@ -219,6 +219,7 @@ class scanner:
                     if positionedcharacter=='=':
                         tokenvalue='='
                         tokentype='equaloperator'
+                        self.__scanningIndex+=1
                     elif positionedcharacter=='!':
                         if(self.__scanningIndex+1<len(code)):
                             if(code[self.__scanningIndex+1]=='='):
@@ -278,7 +279,7 @@ class Token:
         self.value=value
     def __str__(self):
         return 'Token of type {} and value {}'.format(self.type,self.value)
-st='omar12  lala when else familyof 1.2   ,hey ou comment is here uo   "str" bye  "string val" panic listen within when do ; and or [ } ( := !='
+st='omar12  lala when else familyof 1.2   ,hey ou comment is here uo OU comment again UO nothing  "str" bye  "string val" panic listen within when do ; and or [ } ( := != brand - new ++ == !== "embedded string"<= >= > ='
 myscanner=scanner()
 #print(st[122])
 myscanner.scan(st)
