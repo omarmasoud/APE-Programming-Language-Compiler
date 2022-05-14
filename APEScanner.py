@@ -109,6 +109,9 @@ class scanner:
 
                         tokenvalue+=code[self.__scanningIndex]
                         self.__scanningIndex+=1
+                if (self.__scanningIndex<len(code) and code[self.__scanningIndex] != ' '):
+                    raise('unexpected token {} at line {} '.format(code[self.__scanningIndex] ,self.__linenumber))
+
                 tokentype='number'
 
                 self.__tokens.append(Token(Tokentype=tokentype,value=tokenvalue))
@@ -271,7 +274,7 @@ class Token:
         self.value=value
     def __str__(self):
         return 'Token of type {} and value {}'.format(self.type,self.value)
-st='omar12  lala when else familyof 1.2222  panic listen within when do ; and or [ } ( := != < >= <='
+st='omar12  lala when else familyof 1.2222    ou this is a comment uo  panic listen within when do ; and or [ } ( := !='
 myscanner=scanner()
 myscanner.scan(st)
 ls=myscanner.getTokensList()
