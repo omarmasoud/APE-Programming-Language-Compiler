@@ -34,7 +34,7 @@ class scanner:
     def scan(self,code:str):
         tokenvalue=''
         tokentype=''
-        #print('code length is  {}'.format(len(code)))
+        print('code length is  {}'.format(len(code)))
         while (self.__scanningIndex<len(code)):
             #print('scanning at character index {} at line {} '.format(self.__scanningIndex,self.__linenumber))
             if self.__State==ScanningState.Start:
@@ -107,7 +107,7 @@ class scanner:
 
                         tokenvalue+=code[self.__scanningIndex]
                         self.__scanningIndex+=1
-                if (self.__scanningIndex<len(code) and code[self.__scanningIndex] != ' '):
+                if (self.__scanningIndex<len(code) and code[self.__scanningIndex] == '.'):
                     raise('unexpected token {} at line {} '.format(code[self.__scanningIndex] ,self.__linenumber))
 
                 tokentype=TokensTypes.number
@@ -210,7 +210,6 @@ class scanner:
                         tokentype=TokensTypes.multiplicationoperator
                     elif positionedcharacter=='/':
                         tokentype=TokensTypes.divisionoperator
-                    pass
                     self.__scanningIndex+=1
                     tokenvalue=positionedcharacter
                     self.__tokens.append(Token(Tokentype=tokentype,value=positionedcharacter))
@@ -279,7 +278,7 @@ class Token:
         self.value=value
     def __str__(self):
         return 'Token of type {} and value {}'.format(self.type,self.value)
-st='omar12  lala when else familyof 1.2   ,hey ou comment is here uo OU comment again UO nothing  "str" bye  "string val" panic listen within when do ; and or [ } ( := != brand - new ++ == !== "embedded string"<= >= > ='
+st='omar12:= 1+2  lala when else familyof 1.2   ,hey ou comment is here uo OU comment again UO nothing  "str" bye  "string val" panic listen within when do ; and or [ } ( := != brand - new ++ == !== "embedded string"<= >= > ='
 myscanner=scanner()
 #print(st[122])
 myscanner.scan(st)
