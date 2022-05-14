@@ -9,7 +9,7 @@ class scanner:
                                 'familyof','inherit','panic','listen',\
                                 'routine','when','within','do','break']
 
-        self.__special_characters=['(',')','{','}','[',']',';','.',':']
+        self.__special_characters=['(',')','{','}','[',']',';','.',':',',']
 
         self.__arithmetic_operators=['+','-','*','/']
 
@@ -156,16 +156,18 @@ class scanner:
             elif self.__State==ScanningState.Comment:
                 commentstart=self.__linenumber
                 commentclosed=False
-                while((self.__scanningIndex<len(code)-1)):
+                while((self.__scanningIndex<len(code) and (not commentclosed))):
                     if(code[self.__scanningIndex]=='\n'):
 
                         self.__linenumber+=1
                         self.__scanningIndex+=1
 
-                    if((code[self.__scanningIndex]in ['u','U'])\
+                    if((code[self.__scanningIndex] in ['u','U'])\
                         and (code[self.__scanningIndex+1]in ['o','O'])): # checking for comments endings
                         commentclosed=True
-                    self.__scanningIndex+=1
+                        self.__scanningIndex+=2
+                    else:
+                        self.__scanningIndex+=1
                     self.__State=ScanningState.End
                 if(not commentclosed):
                     raise ('comment started at {} was not closed and left open till {}'\
@@ -192,6 +194,8 @@ class scanner:
                         tokentype='leftsquarebracket'
                     elif positionedcharacter==']':
                         tokentype='rightsquarebracket'
+                    elif positionedcharacter==',':
+                        tokentype='comma'
 
                     self.__scanningIndex+=1
                     tokenvalue=positionedcharacter
@@ -265,8 +269,7 @@ class ScanningState(enum.Enum):
     Number=4#done
     Assign=5#done
     Comment=6#done
-    Other=7
-    Error=8
+    Other=7#done
 
 
 class Token:
@@ -275,7 +278,7 @@ class Token:
         self.value=value
     def __str__(self):
         return 'Token of type {} and value {}'.format(self.type,self.value)
-st='omar12  lala when else familyof 1.2222       "str"   "string val" panic listen within when do ; and or [ } ( := !='
+st='omar12  lala when else familyof 1.2   ,hey ou comment is here uo   "str" bye  "string val" panic listen within when do ; and or [ } ( := !='
 myscanner=scanner()
 #print(st[122])
 myscanner.scan(st)
