@@ -34,9 +34,9 @@ class scanner:
     def scan(self,code:str):
         tokenvalue=''
         tokentype=''
-        print('code length is  {}'.format(len(code)))
+        #print('code length is  {}'.format(len(code)))
         while (self.__scanningIndex<len(code)):
-            print('scanning at character index {} at line {} '.format(self.__scanningIndex,self.__linenumber))
+            #print('scanning at character index {} at line {} '.format(self.__scanningIndex,self.__linenumber))
             if self.__State==ScanningState.Start:
                 if code[self.__scanningIndex] in self.__numbers:
                     self.__State=ScanningState.Number
@@ -288,6 +288,7 @@ print(type(ls))
 
 for i in range(len(ls)):
     print(ls[i])
+print('hey')
 
 
 
