@@ -43,9 +43,9 @@ class TokensTypes(Enum):
     equaloperator = auto()
     notequaloperator = auto()
     comma = auto()
+    EOF=auto()
 
 
 
 
 
-print(TokensTypes.divisionoperator.name)
