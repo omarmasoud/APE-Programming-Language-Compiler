@@ -108,7 +108,7 @@ class scanner:
                         tokenvalue+=code[self.__scanningIndex]
                         self.__scanningIndex+=1
                 if (self.__scanningIndex<len(code) and code[self.__scanningIndex] == '.'):
-                    raise('unexpected token {} at line {} '.format(code[self.__scanningIndex] ,self.__linenumber))
+                    raise Exception('unexpected token {} at line {} '.format(code[self.__scanningIndex] ,self.__linenumber))
 
                 tokentype=TokensTypes.number
 
@@ -131,9 +131,9 @@ class scanner:
                         self.__State=ScanningState.End
 
                     else:
-                        raise('Error at line {} expected = after : but not found'.format(self.__linenumber))
+                        raise Exception('Error at line {} expected = after : but not found'.format(self.__linenumber))
                 else:
-                    raise('Error at line {} expected = after : but not found'.format(self.__linenumber))
+                    raise Exception('Error at line {} expected = after : but not found'.format(self.__linenumber))
 
             elif self.__State==ScanningState.String:
                 self.__scanningIndex+=1
@@ -170,7 +170,7 @@ class scanner:
                         self.__scanningIndex+=1
                     self.__State=ScanningState.End
                 if(not commentclosed):
-                    raise ('comment started at {} was not closed and left open till {}'\
+                    raise Exception('comment started at {} was not closed and left open till {}'\
                         .format(commentstart,self.__linenumber))
                 else:
                     self.__State=ScanningState.End
@@ -226,7 +226,7 @@ class scanner:
                                 tokentype=TokensTypes.notequaloperator
                                 self.__scanningIndex+=2
                         else:
-                            raise('at line {} expected = after !'.format(self.__linenumber))
+                            raise Exception('at line {} expected = after !'.format(self.__linenumber))
                     elif positionedcharacter=='<':
                         tokenvalue='<'
                         tokentype=TokensTypes.lessthanoperator
@@ -251,7 +251,7 @@ class scanner:
                     self.__State=ScanningState.End
 
                 else:
-                    raise('unexpected character {}'.format(code[self.__scanningIndex]))
+                    raise Exception('unexpected character {}'.format(code[self.__scanningIndex]))
                 self.__State=ScanningState.End
 
 
@@ -277,11 +277,15 @@ class Token:
         self.type=Tokentype
         self.value=value
     def __str__(self):
-        return 'Token of type {} and value {}'.format(self.type,self.value)
-st='omar12:= 1+2  lala when else familyof 1.2   ,hey ou comment is here uo OU comment again UO nothing  "str" bye  "string val" panic listen within when do ; and or [ } ( := != brand - new ++ == !== "embedded string"<= >= > ='
+        return 'Token of type {} anfd value {}'.format(self.type,self.value)
+st='omar12:= 1+2  lala when else familyof 1.2   ,hey ou comment is here uo OU comment again UO nothing  "str" bye  "string val" panic listen within when do ; and or [ } ( := != brand - new ++ == !== "embedded string"<= >= > =\n 3.826+9.5458.='
+st='when( x > 3)  do{ x := 3 ; } ;  '
 myscanner=scanner()
 #print(st[122])
-myscanner.scan(st)
+try:
+    myscanner.scan(st)
+except Exception as e:
+    print(e)
 ls=myscanner.getTokensList()
 print(type(ls))
 
