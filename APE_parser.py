@@ -1,8 +1,7 @@
-from typing import Type
-from xml.dom.minicompat import NodeList
+
+
 from settings import TokensTypes as Types
 #from anytree import Node,RenderTree,DoubleStyle,AsciiStyle,AbstractStyle
-from TreeNode import Node
 
 
 class Parser:
@@ -15,7 +14,6 @@ class Parser:
         self.finished = False
         self.tabsNumber = 0
         self.pythonLines =""
-        self.classMethodFlag = False
 
         
 
@@ -93,10 +91,10 @@ class Parser:
    
     
 
-    def statement(self):
+    def statement(self,isClass:bool = False):
         
         if(self.peek(Types.identifier) and self.peekNext(Types.leftbracket) == False):
-            return self.assignStmt()
+            return self.assignStmt(isClass)
         if(self.peek("panic",checkbyValue=True)):
             return self.printStmt()
         if(self.peek("listen", checkbyValue=True)):
@@ -104,7 +102,7 @@ class Parser:
         if(self.peek("when",checkbyValue=True) or self.peek("within",checkbyValue=True)):
             return self.loopStmt()
         if(self.peek("routine", checkbyValue=True)):
-            return self.funcDef()
+            return self.funcDef(isClass)
         if(self.peek("familyof",checkbyValue=True)):
             return self.classDef()
         if(self.peek("return",checkbyValue=True)):
@@ -164,9 +162,12 @@ class Parser:
 
 
         ####---------------------IDENTIFIER------------------------------------------------
-    def identifier(self):
+    def identifier(self,isClass=False):
         if(self.peek(Types.identifier)):
-            self.pythonLines += self.currentToken.value
+            if isClass:
+                self.pythonLines += 'self.'+ self.currentToken.value
+            else:
+                self.pythonLines += self.currentToken.value
             self.match(Types.identifier)
             if(self.peek(Types.dot)):
                 self.pythonLines += "."
@@ -249,7 +250,7 @@ class Parser:
     def exp(self):
         if(self.peek(Types.string)):
 
-            self.pythonLines += "\"" + self.currentToken.value + "\""
+            self.pythonLines +=  self.currentToken.value 
             self.match(Types.string)
             return True
         else:
@@ -328,10 +329,10 @@ class Parser:
     ###----------------------------------------------------------------------------------
 
     ###---------------------------------STATEMENTS-------------------------------------------------
-    def assignStmt(self):
+    def assignStmt(self,isClass=False):
 
         self.pythonLines += self.getTabsString()
-        if(self.identifier()):
+        if(self.identifier(isClass)):
             if(self.peek(Types.assignmentoperator)):
          
                 self.pythonLines += "="
@@ -343,7 +344,7 @@ class Parser:
         return False
 
 
-    def returnStmt(self):
+    def returnStmt(self,isClass=False):
         self.pythonLines += self.getTabsString()
         if(self.peek("return",checkbyValue=True)):
             self.pythonLines += "return "
@@ -377,7 +378,7 @@ class Parser:
         return False
 
 
-    def printStmt(self, parentNode=None):
+    def printStmt(self):
         self.pythonLines += self.getTabsString()
         self.pythonLines += ("print")
         self.match("panic",checkbyValue=True)
@@ -408,8 +409,6 @@ class Parser:
             self.match(Types.identifier)
             self.match(Types.rightbracket)
             self.pythonLines += "{} = input() \n".format(id)
-            
-
             return True
         self.pythonLines += "\n"
         
@@ -475,24 +474,34 @@ class Parser:
             return True
         return False
     
-    def funcDef(self, parentNode=None, isClass = False):
+    def funcDef(self, isClass = False):
         self.pythonLines += self.getTabsString()
         if(self.peek("routine",checkbyValue=True)):
             self.pythonLines += "def "
             self.match("routine",checkbyValue=True)
-            if(self.peek("init",checkbyValue=True)):
-                self.match(Types.identifier)
-                self.pythonLines += "__init__(self,"
-                self.match(Types.leftbracket)
-                self.params()
-                self.pythonLines += self.currentToken.value
-                self.match(Types.rightbracket)
-                self.pythonLines += ":\n"
-                self.classMethodFlag = True
-                print("Class method flag: ")
-                print(self.classMethodFlag)
-                self.matchstmtseq()
-                self.classMethodFlag = False
+            if isClass:
+
+                if(self.peek("init",checkbyValue=True)):
+                    self.match(Types.identifier)
+                    self.pythonLines += "__init__(self,"
+                    self.match(Types.leftbracket)
+                    self.params()
+                    self.pythonLines += self.currentToken.value
+                    self.match(Types.rightbracket)
+                    self.pythonLines += ":\n"
+                    self.matchstmtseq(isClass)
+                else:
+                    self.pythonLines += self.currentToken.value
+                    self.match(Types.identifier)
+                    self.pythonLines += "("
+                    self.match(Types.leftbracket)
+                    self.pythonLines += "self,"
+                    self.params()
+                    self.pythonLines += ")"
+                    self.match(Types.rightbracket)
+                    self.pythonLines += ":\n"
+                    self.matchstmtseq(isClass)
+
             else:
                 self.pythonLines += self.currentToken.value
                 self.match(Types.identifier)
@@ -524,10 +533,10 @@ class Parser:
                 self.match("inherit",checkbyValue=True)
                 self.pythonLines += "("  + self.currentToken.value + "):\n"
                 self.match(Types.identifier)
-                self.matchstmtseq()
+                self.matchstmtseq(True)
             else:
                 self.pythonLines += ":\n"
-                self.matchstmtseq()
+                self.matchstmtseq(True)
             
             return True
         return False
@@ -537,9 +546,9 @@ class Parser:
 
     def Program(self):
         return self.StatementSequence()
-    def StatementSequence(self):
+    def StatementSequence(self,isClass:bool = False):
         
-        if(self.statement()):
+        if(self.statement(isClass)):
             if(self.peek(Types.semicolon) == False):
                 raise SyntaxError('semi colon messing!')
             
@@ -547,14 +556,14 @@ class Parser:
                 
                 self.match(Types.semicolon)
                 if(self.currentToken.type != Types.EOF and (self.currentToken.value not in [")","}","]"])):
-                    self.statement()
+                    self.statement(isClass)
             return True
         return False
 
-    def matchstmtseq(self):
+    def matchstmtseq(self,isClass:bool = False):
         self.tabsNumber += 1
         self.match(Types.leftcurlybracket)
-        if(self.StatementSequence()):
+        if(self.StatementSequence(isClass)):
             self.match(Types.rightcurlybracket)
         self.tabsNumber -=1
 

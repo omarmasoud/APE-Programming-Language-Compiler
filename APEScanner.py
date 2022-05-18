@@ -332,19 +332,21 @@ panic(dog1.breed);
 dog1.setName("Kovo");
 panic(dog1.name);
 """
-myscanner=scanner()
-#print(st[122])
-try:
-    myscanner.scan(st)
-except Exception as e:
-    print(e)
-ls=myscanner.getTokensList()
-print(type(ls))
 
-for i in range(len(ls)):
-    print(ls[i])
-print('hey')
-
+if __name__ == "__main__":
+    myscanner=scanner()
+    #print(st[122])
+    try:
+        myscanner.scan(st)
+    except Exception as e:
+        print(e)
+    ls=myscanner.getTokensList()
+    print(type(ls))
+    
+    for i in range(len(ls)):
+        print(ls[i])
+    print('hey')
+    
 
 
 
