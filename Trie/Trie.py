@@ -10,8 +10,25 @@ class TrieNode :
     
 class Trie:
 
-    def __init__(self) -> None:
+    def __init__(self):
         self.head = TrieNode('')
+        keywords = [
+        "NEW",
+        "IF",
+        "ELSE",
+        "ELSEIF",
+        "RETURN",
+        "FAMILYOF",
+        "INHERIT",
+        "PANIC",
+        "LISTEN",
+        "ROUTINE",
+        "WHEN",
+        "BREAK",
+        "DO",
+        "WITHIN" ]
+        for word in keywords:
+            self.add(word)
 
     def add(self,item:str):
         pointer = self.head

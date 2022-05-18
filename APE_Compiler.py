@@ -3,12 +3,12 @@ from APEScanner import scanner,Token
 import settings
 
 class Compiler:
-    def __init__(self,code):
+    def __init__(self):
         self.s = scanner()
-        self.code = code
+        #self.code = code
         
-    def compile(self):
-        self.s.scan(self.code)
+    def compile(self,text):
+        self.s.scan(text)
         t = Token(settings.TokensTypes.EOF,123)
         print("\nPrinting list of tokens : ")
         tokens = self.s.getTokensList()

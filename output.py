@@ -1,1 +1,8 @@
-hello.length
+print(x)
+print(x)
+print(x)
+print(x)
+print(x)
+print(x)
+print(x)
+print(x)
