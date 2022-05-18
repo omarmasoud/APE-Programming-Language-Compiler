@@ -1,3 +1,4 @@
+from typing import Type
 from xml.dom.minicompat import NodeList
 from settings import TokensTypes as Types
 #from anytree import Node,RenderTree,DoubleStyle,AsciiStyle,AbstractStyle
@@ -14,8 +15,9 @@ class Parser:
         self.finished = False
         self.tabsNumber = 0
         self.pythonLines =""
+        self.classMethodFlag = False
 
-        self.f = open("generated.py","r+")
+        
 
     
     def checkCurrentTokenByType(self, tokenType):
@@ -35,19 +37,21 @@ class Parser:
         for i in range(self.tabsNumber):
             a += "\t"
         return a 
+    def getPythonCode(self):
+        return self.pythonLines
     ## Match token     
     def match(self,foundVal, checkbyValue= False):
         if(self.currentToken.type.name != "EOF"):
             # matched or not ?
             if(checkbyValue):
                 if(self.checkCurrentTokenByVal(foundVal)):
-                    #print("\nDone Parsing {}".format(self.currentToken.value))
+                    print("\nDone Parsing {}".format(self.currentToken.value))
                     self.stepOneToken()
                 else:
                     raise ValueError('TokenType Mismatch', self.currentToken)
             else:
                 if(self.checkCurrentTokenByType(foundVal)):
-                    #print("Done Parsing {}".format(self.currentToken.value))
+                    print("Done Parsing {}".format(self.currentToken.value))
                     self.stepOneToken()
                 else:
                 
@@ -90,6 +94,7 @@ class Parser:
     
 
     def statement(self):
+        
         if(self.peek(Types.identifier) and self.peekNext(Types.leftbracket) == False):
             return self.assignStmt()
         if(self.peek("panic",checkbyValue=True)):
@@ -127,6 +132,7 @@ class Parser:
         ####---------------------OBJECT------------------------------------------------
     
     def obj(self):
+        #self.pythonLines += self.getTabsString()
         if(self.peek("new",checkbyValue=True)):
             self.match("new",checkbyValue=True)
             self.pythonLines += self.currentToken.value
@@ -139,6 +145,17 @@ class Parser:
                 self.match(Types.identifier)
                 self.matchBetweenBrackets("()",self.params,optional=True)
             return True
+        elif(self.peek(Types.identifier)):
+            pass
+            # self.pythonLines += self.currentToken.value
+            # self.match(Types.identifier)
+            # self.pythonLines += self.currentToken.value
+            # self.match(Types.leftsquarebracket)
+            # self.pythonLines += self.currentToken.value
+            # self.match(Types.number)
+            # self.pythonLines += self.currentToken.value
+            # self.match(Types.rightsquarebracket)
+            # return True
         return False
                                     
 
@@ -156,10 +173,11 @@ class Parser:
                 self.match(Types.dot)
                 if(self.peek(Types.identifier)):
                     self.pythonLines += self.currentToken.value
-           
                     self.match(Types.identifier)
                     if(self.peek(Types.leftbracket)):
                         self.matchBetweenBrackets("()",self.params, optional=True)
+                        if(self.peek(Types.dot) == False):
+                            self.pythonLines += "\n"
                     return True
                 
             
@@ -289,6 +307,7 @@ class Parser:
 
             self.match(Types.number)
             return True
+        
         elif(self.identifier()):
             
             return True
@@ -325,21 +344,34 @@ class Parser:
 
 
     def returnStmt(self):
+        self.pythonLines += self.getTabsString()
         if(self.peek("return",checkbyValue=True)):
+            self.pythonLines += "return "
             self.match("return",checkbyValue=True)
             self.exp()
+            self.pythonLines += "\n"
             return True
+        
+        self.pythonLines += "\n"
         return False
 
     def ifStmt(self): 
+        self.pythonLines += self.getTabsString()
         if(self.peek("if",checkbyValue=True)):
+            self.pythonLines += "if ("
             self.match("if",checkbyValue=True)
             self.matchBetweenBrackets("()", self.exp)
+            self.pythonLines += "):\n"
             self.matchstmtseq()
             while(self.peek("elseif",checkbyValue=True)):
+                self.pythonLines += "elif ("
+                self.match("elseif",checkbyValue=True)
                 self.matchBetweenBrackets("()",self.exp)
+                self.pythonLines += "):\n"
                 self.matchstmtseq()
             if(self.peek("else",checkbyValue=True)):
+                self.pythonLines += "else: \n"
+                self.match("else",checkbyValue=True)
                 self.matchstmtseq()
             return True
         return False
@@ -401,11 +433,13 @@ class Parser:
             self.pythonLines += "while("
             self.exp()
             self.pythonLines += "): \n"
+            self.tabsNumber += 1
             self.match(Types.semicolon)
+            #self.pythonLines += self.getTabsString()
             self.assignStmt()
             condLine = 0
-            print("PythonLines: \n {} \n".format(self.pythonLines))
-            for i in range(len(self.pythonLines)):
+            #print("PythonLines: \n {} \n".format(self.pythonLines))
+            for i in range(len(self.pythonLines)-1,0,-1):
                 if(self.pythonLines[i] == ":"):
                     condLine = i+2
                     break
@@ -419,35 +453,59 @@ class Parser:
             self.match(Types.semicolon)
             self.match(Types.rightbracket)
             self.match(Types.leftcurlybracket)
-            self.tabsNumber += 1
+            print("TABS : {}".format(self.tabsNumber))
+            
             if(self.StatementSequence()):
-                #self.pythonLines += self.getTabsString()
+                self.pythonLines += self.getTabsString()
                 self.pythonLines += endLine
                 self.match(Types.rightcurlybracket)
+            
             self.tabsNumber -=1
             return True
         return False
 
     def whenLoop(self, parentNode=None):
         if(self.peek("when",checkbyValue=True)):
+            self.pythonLines += "while("
             self.match("when",checkbyValue=True)
             self.matchBetweenBrackets("()",self.exp)
+            self.pythonLines += "):\n"
             self.match("do",checkbyValue=True)
             self.matchstmtseq()
             return True
         return False
     
-    def funcDef(self, parentNode=None):
+    def funcDef(self, parentNode=None, isClass = False):
+        self.pythonLines += self.getTabsString()
         if(self.peek("routine",checkbyValue=True)):
+            self.pythonLines += "def "
             self.match("routine",checkbyValue=True)
-            self.match(Types.identifier)
-            self.matchBetweenBrackets("()",self.params,optional=True)
-            self.matchstmtseq()
+            if(self.peek("init",checkbyValue=True)):
+                self.match(Types.identifier)
+                self.pythonLines += "__init__(self,"
+                self.match(Types.leftbracket)
+                self.params()
+                self.pythonLines += self.currentToken.value
+                self.match(Types.rightbracket)
+                self.pythonLines += ":\n"
+                self.classMethodFlag = True
+                print("Class method flag: ")
+                print(self.classMethodFlag)
+                self.matchstmtseq()
+                self.classMethodFlag = False
+            else:
+                self.pythonLines += self.currentToken.value
+                self.match(Types.identifier)
+                self.matchBetweenBrackets("()",self.params,optional=True)
+                self.pythonLines += ":\n"
+                self.matchstmtseq()
             return True
         return False 
     def funcCall(self, parentNode=None):
         #funcCall->id “(” [ params] “)”
+        self.pythonLines += self.getTabsString()
         if(self.peek(Types.identifier)):
+            self.pythonLines += self.currentToken.value
             self.match(Types.identifier)
             self.matchBetweenBrackets("()",self.params,optional=True)
             return True
@@ -455,15 +513,22 @@ class Parser:
 
 
     def classDef(self, parentNode=None):
+        self.pythonLines += self.getTabsString()
         if(self.peek("familyof",checkbyValue=True)):
+            self.pythonLines += "class "
             self.match("familyof",checkbyValue=True)
+            self.pythonLines += self.currentToken.value
             self.match(Types.identifier)
             if(self.peek("inherit",checkbyValue=True)):
+                
                 self.match("inherit",checkbyValue=True)
+                self.pythonLines += "("  + self.currentToken.value + "):\n"
                 self.match(Types.identifier)
                 self.matchstmtseq()
             else:
+                self.pythonLines += ":\n"
                 self.matchstmtseq()
+            
             return True
         return False
 
@@ -487,9 +552,11 @@ class Parser:
         return False
 
     def matchstmtseq(self):
+        self.tabsNumber += 1
         self.match(Types.leftcurlybracket)
         if(self.StatementSequence()):
             self.match(Types.rightcurlybracket)
+        self.tabsNumber -=1
 
     def matchBetweenBrackets(self, bracket, tokenFunc, optional = 0):
         if(bracket == '[]'):
