@@ -1,19 +1,27 @@
-class math:
-	def __init__(self,number1,number2):
-		self.number1=number1
-		self.number2=number2
-	def setNum1(self,num1):
-		self.number1=num1
-	def setNum2(self,num2):
-		self.number2=num2
-	def getnum1(self,num1):
-		return self.number1
-	def exec(self,x):
-		if ((x>10)):
-			print("x is greater then 10")
-		while((x<10)):
-			x=x+1
-			y = input() 
-			print(y)
-mat=math(1,2)
-mat.exec(12)
+class Dog:
+	def __init__(self,name,breed,age,color):
+		self.name=name
+		self.breed=breed
+		self.age=age
+		self.color=color
+	def getName(self,):
+		return self.name
+	def getBreed(self,):
+		return self.breed
+	def getColor(self,):
+		return self.color
+	def getAge(self,):
+		return self.age
+	def setName(self,Name):
+		self.name=Name
+	def setBreed(self,Breed):
+		self.breed=Breed
+	def setColor(self,Color):
+		self.color=Color
+	def setAge(self,Age):
+		self.age=Age
+dog1=Dog("Kovu","German Shepherd",2,"Brown")
+print(dog1.name)
+print(dog1.breed)
+dog1.setName("Kovo")
+print(dog1.name)

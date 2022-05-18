@@ -164,9 +164,9 @@ class Parser:
 
         ####---------------------IDENTIFIER------------------------------------------------
     def identifier(self,isClass=False,init=False,secondInit=False):
-        print("==============")
-        print("flags state")
-        print(isClass,init,secondInit)
+        # print("==============")
+        # print("flags state")
+        # print(isClass,init,secondInit)
         if(self.peek(Types.identifier)):
             if isClass:
                 if init:
@@ -464,8 +464,8 @@ class Parser:
                     break
                     
             endLine = self.pythonLines[condLine+1:]
-            print("Endline : \n {}".format(endLine))
-            print("Before reassign :  \n {}".format(self.pythonLines[:condLine+1]))
+            # print("Endline : \n {}".format(endLine))
+            # print("Before reassign :  \n {}".format(self.pythonLines[:condLine+1]))
             self.pythonLines = self.pythonLines[:condLine+1]
             
             

@@ -281,51 +281,48 @@ class Token:
 st='omar12:= 1+2  lala when else familyof 1.2   ,hey ou comment is here uo OU comment again UO nothing  "str" bye  "string val" panic listen within when do ; and or [ } ( := != brand - new ++ == !== "embedded string"<= >= > =\n 3.826+9.5458.='
 st='when( x > 3)  do{ x := 3 ; } ;  '
 st="""FamilyOf Dog {
-	name = "";
-	breed = "";
-	age = 0;
-	color = "";
-	routine dog(Name, Breed, Age, Color) {
-		name = Name;
-		breed = Breed;
-		age = Age;
-		color = Color;
+    routine init(name,breed,age,color){
+        name = "";
+	    breed = "";
+	    age = 0;
+	    color = "";
+    };
 	OU GETTERS UO
 	routine getName()
 	{
 		return name;
-	}
+	};
 	routine getBreed()
 	{
 		return breed;
-	}
+	};
 	routine getColor()
 	{
 		return color;
-	}
+	};
 	routine getAge()
 	{
 		return age;
-	}
+	};
 	OU SETTERS UO
 	routine setName(Name)
 	{
 		name = Name;
-	}
+	};
 	routine setBreed(Breed)
 	{
 		breed = Breed;
-	}
+	};
 	routine setColor(Color)
 	{
 		color = Color;
-	}
+	};
 	routine setAge(Age)
 	{
 		age = Age;
-	}
+	};
 
-}
+};
 dog1 = new Dog("Kovu", "German Shepherd", 2 , "Brown");
 panic(dog1.name);
 panic(dog1.breed);
@@ -342,11 +339,11 @@ if __name__ == "__main__":
         print(e)
     ls=myscanner.getTokensList()
     print(type(ls))
-    
+
     for i in range(len(ls)):
         print(ls[i])
     print('hey')
-    
+
 
 
 
