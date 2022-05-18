@@ -14,7 +14,8 @@ class Parser:
         self.finished = False
         self.tabsNumber = 0
         self.pythonLines =""
-
+        self.currentClass = ''
+        self.classVariables = {}
         
 
     
@@ -91,10 +92,10 @@ class Parser:
    
     
 
-    def statement(self,isClass:bool = False):
+    def statement(self,isClass:bool = False,init=False):
         
         if(self.peek(Types.identifier) and self.peekNext(Types.leftbracket) == False):
-            return self.assignStmt(isClass)
+            return self.assignStmt(isClass,init)
         if(self.peek("panic",checkbyValue=True)):
             return self.printStmt()
         if(self.peek("listen", checkbyValue=True)):
@@ -106,7 +107,7 @@ class Parser:
         if(self.peek("familyof",checkbyValue=True)):
             return self.classDef()
         if(self.peek("return",checkbyValue=True)):
-            return self.returnStmt()
+            return self.returnStmt(isClass)
         if(self.peek("if",checkbyValue=True)):
             return self.ifStmt()
         if(self.peek(Types.identifier) and self.peekNext(Types.leftbracket)):
@@ -162,12 +163,27 @@ class Parser:
 
 
         ####---------------------IDENTIFIER------------------------------------------------
-    def identifier(self,isClass=False):
+    def identifier(self,isClass=False,init=False,secondInit=False):
+        print("==============")
+        print("flags state")
+        print(isClass,init,secondInit)
         if(self.peek(Types.identifier)):
             if isClass:
-                self.pythonLines += 'self.'+ self.currentToken.value
-            else:
+                if init:
+                    self.pythonLines += 'self.'+ self.currentToken.value
+                    self.classVariables[self.currentClass].append(self.currentToken.value)
+                elif secondInit:
+                    self.pythonLines += self.currentToken.value
+                else:
+                    if self.currentToken.value in self.classVariables[self.currentClass]:
+                        self.pythonLines += 'self.'+ self.currentToken.value
+                    else:
+                        self.pythonLines += self.currentToken.value
+
+            
+            else:    
                 self.pythonLines += self.currentToken.value
+                # self.pythonLines += self.currentToken.value
             self.match(Types.identifier)
             if(self.peek(Types.dot)):
                 self.pythonLines += "."
@@ -247,7 +263,7 @@ class Parser:
 
         ###----------------------------------------------------------------------------------
     ###-------------------------------EXPRESSIONS---------------------------------------------------    
-    def exp(self):
+    def exp(self,isClass=False,init=False,secondInit=False):
         if(self.peek(Types.string)):
 
             self.pythonLines +=  self.currentToken.value 
@@ -255,11 +271,11 @@ class Parser:
             return True
         else:
 
-            return self.explow()
+            return self.explow(isClass,init,secondInit)
 
 
-    def explow(self):
-        if(self.explowlow()):
+    def explow(self,isClass=False,init=False,secondInit=False):
+        if(self.explowlow(isClass,init,secondInit)):
             while(self.peek(Types.logical_operator)):
                 self.logicalOp()
                 self.explowlow()
@@ -269,8 +285,8 @@ class Parser:
 
 
 
-    def explowlow(self):
-        if(self.simpleExp()):
+    def explowlow(self,isClass=False,init=False,secondInit=False):
+        if(self.simpleExp(isClass,init,secondInit)):
             #print("CURRENT VALUE: ")
             #print(self.currentToken.value)
             while(self.checkforComparisonOp()):
@@ -284,8 +300,8 @@ class Parser:
 
 
 
-    def simpleExp(self):
-        if(self.term()):
+    def simpleExp(self,isClass=False,init=False,secondInit=False):
+        if(self.term(isClass,init,secondInit)):
 
             while(self.peek(Types.additionoperator) or self.peek(Types.subtractionoperator)):
                 self.additionOp()
@@ -294,22 +310,22 @@ class Parser:
         return False
 
 
-    def term(self):
-        if(self.primaryExpr()):
+    def term(self,isClass=False,init=False,secondInit=False):
+        if(self.primaryExpr(isClass,init,secondInit)):
             while(self.peek(Types.multiplicationoperator) or self.peek(Types.divisionoperator)):
                 self.multiplicationOp()
                 self.primaryExpr()
             return True
         return False
 
-    def primaryExpr(self):
+    def primaryExpr(self,isClass=False,init=False,secondInit=False):
         if(self.peek(Types.number)):
             self.pythonLines += self.currentToken.value
 
             self.match(Types.number)
             return True
         
-        elif(self.identifier()):
+        elif(self.identifier(isClass,init,secondInit)):
             
             return True
         elif(self.peek(Types.leftbracket)):
@@ -329,15 +345,19 @@ class Parser:
     ###----------------------------------------------------------------------------------
 
     ###---------------------------------STATEMENTS-------------------------------------------------
-    def assignStmt(self,isClass=False):
+    def assignStmt(self,isClass=False,init=False):
 
         self.pythonLines += self.getTabsString()
-        if(self.identifier(isClass)):
+        if(self.identifier(isClass,init)):
             if(self.peek(Types.assignmentoperator)):
          
                 self.pythonLines += "="
                 self.match(Types.assignmentoperator)
-                if(self.exp() or self.obj()):
+                temp =True
+                if init == True:
+                    temp = False
+                print(isClass,temp)
+                if(self.exp(isClass,False,True) or self.obj()):
                     self.pythonLines += "\n"
                     return True
                 self.pythonLines += "\n"
@@ -349,7 +369,7 @@ class Parser:
         if(self.peek("return",checkbyValue=True)):
             self.pythonLines += "return "
             self.match("return",checkbyValue=True)
-            self.exp()
+            self.exp(isClass)
             self.pythonLines += "\n"
             return True
         
@@ -489,7 +509,7 @@ class Parser:
                     self.pythonLines += self.currentToken.value
                     self.match(Types.rightbracket)
                     self.pythonLines += ":\n"
-                    self.matchstmtseq(isClass)
+                    self.matchstmtseq(isClass,True)
                 else:
                     self.pythonLines += self.currentToken.value
                     self.match(Types.identifier)
@@ -510,7 +530,7 @@ class Parser:
                 self.matchstmtseq()
             return True
         return False 
-    def funcCall(self, parentNode=None):
+    def funcCall(self):
         #funcCall->id “(” [ params] “)”
         self.pythonLines += self.getTabsString()
         if(self.peek(Types.identifier)):
@@ -521,11 +541,13 @@ class Parser:
         return False
 
 
-    def classDef(self, parentNode=None):
+    def classDef(self,):
         self.pythonLines += self.getTabsString()
         if(self.peek("familyof",checkbyValue=True)):
             self.pythonLines += "class "
             self.match("familyof",checkbyValue=True)
+            self.currentClass = self.currentToken.value
+            self.classVariables[self.currentClass] = []
             self.pythonLines += self.currentToken.value
             self.match(Types.identifier)
             if(self.peek("inherit",checkbyValue=True)):
@@ -536,7 +558,7 @@ class Parser:
                 self.matchstmtseq(True)
             else:
                 self.pythonLines += ":\n"
-                self.matchstmtseq(True)
+                self.matchstmtseq(isClass=True)
             
             return True
         return False
@@ -546,9 +568,9 @@ class Parser:
 
     def Program(self):
         return self.StatementSequence()
-    def StatementSequence(self,isClass:bool = False):
+    def StatementSequence(self,isClass:bool = False,init=False):
         
-        if(self.statement(isClass)):
+        if(self.statement(isClass,init)):
             if(self.peek(Types.semicolon) == False):
                 raise SyntaxError('semi colon messing!')
             
@@ -556,14 +578,14 @@ class Parser:
                 
                 self.match(Types.semicolon)
                 if(self.currentToken.type != Types.EOF and (self.currentToken.value not in [")","}","]"])):
-                    self.statement(isClass)
+                    self.statement(isClass,init)
             return True
         return False
 
-    def matchstmtseq(self,isClass:bool = False):
+    def matchstmtseq(self,isClass:bool = False,init=False):
         self.tabsNumber += 1
         self.match(Types.leftcurlybracket)
-        if(self.StatementSequence(isClass)):
+        if(self.StatementSequence(isClass,init)):
             self.match(Types.rightcurlybracket)
         self.tabsNumber -=1
 
