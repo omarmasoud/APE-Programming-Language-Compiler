@@ -1,1 +1,1 @@
-x = input() 
+print(

@@ -1,5 +1,19 @@
 
-
+keywords = [
+        "new",
+        "if",
+        "else",
+        "elseif",
+        "return",
+        "familyof",
+        "inherir",
+        "panic",
+        "listen",
+        "routine",
+        "when",
+        "break",
+        "do",
+        "within" ]
 
 class TrieNode :
     def __init__(self,data:str) -> None:
@@ -12,25 +26,12 @@ class Trie:
 
     def __init__(self):
         self.head = TrieNode('')
-        keywords = [
-        "NEW",
-        "IF",
-        "ELSE",
-        "ELSEIF",
-        "RETURN",
-        "FAMILYOF",
-        "INHERIT",
-        "PANIC",
-        "LISTEN",
-        "ROUTINE",
-        "WHEN",
-        "BREAK",
-        "DO",
-        "WITHIN" ]
-        for word in keywords:
-            self.add(word)
+        self.keywords = []
+        self.addAll()
 
     def add(self,item:str):
+        if item in self.keywords:
+            return 
         pointer = self.head
         size = len(item) - 1
         item = item.lower()
@@ -42,6 +43,7 @@ class Trie:
             pointer = pointer.next[char]
           
         pointer.end = True
+        self.keywords.append(item)
             
     def autoComplete(self,word:str):
         node = self.head
@@ -61,27 +63,16 @@ class Trie:
         for child in node.next.values():
             self.DFS(res,child,prefix+node.data)
 
+    def addAll(self):
+        for keyword in keywords:
+            print(keyword)
+            self.add(keyword)
+
 if __name__ == "__main__":
     x = "I"
-    print(x[:-1])
-    keywords = [
-    "NEW",
-    "IF",
-    "ELSE",
-    "ELSEIF",
-    "RETURN",
-    "FAMILYOF",
-    "INHERIT",
-    "PANIC",
-    "LISTEN",
-    "ROUTINE",
-    "WHEN",
-    "BREAK",
-    "DO",
-    "WITHIN" ]
+    
     trie = Trie()
-    for word in keywords:
-        trie.add(word)
+    print(trie.head.next)
     print(trie.autoComplete('List'))
     print(trie.autoComplete('R'))
     print(trie.autoComplete('els'))

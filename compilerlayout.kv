@@ -111,21 +111,25 @@ WindowManager:
         BoxLayout:
             id: mainCode
             orientation:'vertical'
-            TextInput:
-                id: tinyCode
-                pos_hint:{"x":0,"y":0.9}
-                size_hint:(1,0.8)
-                multiline:True
-                padding:20
-                suggestion_text: "hello"
-                on_text: root.configAutoComplete()
-            Spinner:
+            Editor:
+                id:edit
+            ScrollView:
                 id:suggestions
+                do_scroll: False,True
                 size_hint:(1,0.2)
-                text: ''
+                text: ' '
                 
             
-                    
+<Editor>:
+    id: tinyCode
+    pos_hint:{"x":0,"y":0.9}
+    size_hint:(1,0.8)
+    multiline:True
+    padding:20
+    #suggestion_text: "hello"
+    #on_key_down: root.inputHandler()
+    #on_text: root.configAutoComplete()
+    #on_focus: root.getKeyBoard()                    
 <Code>:
     name:"code"
     canvas: 
