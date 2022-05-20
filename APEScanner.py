@@ -255,7 +255,9 @@ class scanner:
                 self.__State=ScanningState.End
 
 
-    def resetScanner(self):
+    def resetScanner(self , resetTokens = False):
+        if(resetTokens):
+            self.__tokens = []
         self.__scanningIndex=0
         self.__linenumber=1
         self.__State=ScanningState.Start

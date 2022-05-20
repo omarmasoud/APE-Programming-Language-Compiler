@@ -1,0 +1,178 @@
+ #CompilerGU.py: my.kv
+
+WindowManager:
+    CompilerLayout:
+    Code:
+    TokenTable:
+<P>:
+    BoxLayout:
+        orientation:"vertical"
+        Label:
+            pos: self.pos
+            size: self.size
+            font_size:'40dp'
+            id:errorLabel
+            text:"Error"
+            pos: self.pos
+            size: self.size
+
+
+
+<TokenTable>:
+    name:"tableScreen"
+    canvas: 
+        Color:
+            rgba: 0.5, 0.5, 0.5, 0.5
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    BoxLayout:
+        orientation: 'vertical'
+        size:root.width,root.height
+        padding:'10dp'
+        spacing:5
+        id:preC
+        Label:
+            id:cLabel
+            text: "Tokens Table: "
+            size_hint: (1,0.1)
+            pos_hint:{'top':1}
+
+        ScrollView:
+            size:self.size
+            size_hint:1,1
+            do_scroll: False,True
+
+            GridLayout:
+                id: tableLayout
+                height:self.minimum_height
+                size_hint_y: None
+                cols: 3
+                row_default_height: '50dp'
+                row_force_default: True
+                spacing: 0, 0
+                padding: 0, 0
+        BoxLayout:
+            orientation:'horizontal'
+            size_hint: 1, 0.1
+            padding:2
+            Button:
+                text: "Back"
+                size_hint: 1, 1
+                #pos_hint: {"x":1, "y":0.1}
+                on_press: 
+                    app.root.current = "compiler"
+                    root.manager.transition.direction = "right"
+            Button:
+                id:goToC
+                text: "C code"
+                size_hint: 1, 1
+                #pos_hint: {"x":1, "y":0.1}
+                on_press: 
+                    app.root.current = "code"
+                    root.manager.transition.direction = "left"
+        
+
+        
+<CompilerLayout>:
+    name:"compiler"
+    canvas:
+        Color:
+            rgba: 0.5, 0.5, 0.5, 0.5
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    BoxLayout:
+        orientation: 'vertical'
+        size:root.width,root.height
+        padding:'10dp'
+        spacing:5
+
+        BoxLayout:
+            orientation:'horizontal'
+            pos_hint:{'top':1}
+            size_hint:(0.25,0.1)
+            Button:
+                text:""
+                on_press:
+                    root.run(app)
+                    #app.root.current = "code"
+                    #root.manager.transition.direction = "left"
+                pos_hint:{'top':1,'center_x':1, 'right':1}
+                size_hint:(0.15,1)
+                background_color:0,2,0,1
+                Image:
+                    pos_hint_y : None
+                    source: 'play.png'
+                    center_y: (self.parent.y + self.parent.height/2)
+                    center_x: self.parent.x + self.parent.width/2
+                    size: 20,20
+                    allow_stretch: True
+        BoxLayout:
+            id: mainCode
+            orientation:'vertical'
+            TextInput:
+                id: tinyCode
+                pos_hint:{"x":0,"y":0.9}
+                size_hint:(1,0.8)
+                multiline:True
+                padding:20
+                suggestion_text: "hello"
+                on_text: root.configAutoComplete()
+            Spinner:
+                id:suggestions
+                size_hint:(1,0.2)
+                text: ''
+                
+            
+                    
+<Code>:
+    name:"code"
+    canvas: 
+        Color:
+            rgba: 0.5, 0.5, 0.5, 0.5
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    BoxLayout:
+        orientation: 'vertical'
+        size:root.width,root.height
+        padding:'10dp'
+        spacing:5
+        id:preC
+        Label:
+            id:cLabel
+            text: "C code: "
+            size_hint: (1,0.1)
+            pos_hint:{'top':1}
+        TextInput:
+            #pos_hint:{"x":0,"y":0.9}
+            id:cTextInput
+            size_hint:(1,0.9)
+            text:"Code here sample ..."
+            disabled:True
+            multiline:True
+            padding:20
+        BoxLayout:
+            size_hint: 1, 0.1
+            orientation:'horizontal'    
+            Button:
+                text: "Back"
+                size_hint: 1, 1
+                #pos_hint: {"x":1, "y":0.1}
+                on_press: 
+                    app.root.current = "compiler"
+                    root.manager.transition.direction = "right"
+            Button:
+                text: "Copy"
+                size_hint: 1, 1
+                #pos_hint: {"x":1, "y":0.1}
+                on_press: 
+                    root.copy()
+            Button:
+                text: "Exit"
+                size_hint: 1, 1
+                #pos_hint: {"x":1, "y":0.1}
+                on_press: 
+                    app.get_running_app().stop()
+

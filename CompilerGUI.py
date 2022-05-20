@@ -1,204 +1,133 @@
-from cgitb import text
-import sys
-from xml.etree.ElementTree import tostring
+from logging import disable
+from kivy.config import Config
+Config.set('kivy','window_icon','hacking.png')
+from os import error
+from typing import Text
+import kivy
+from kivy.app import App
+from kivy.core import text
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.textinput import TextInput
+from kivy.uix.button import Button
+from kivy.uix.widget import Widget
+from kivy.lang import Builder
+from kivy.uix.popup import Popup
+from kivy.uix.screenmanager import ScreenManager, Screen
+import pyperclip
+from kivy.clock import Clock
 from APE_Compiler import Compiler
-from PyQt5.Qt import Qt
-from PyQt5.QtWidgets import (QWidget,QGridLayout,QTableWidget,QApplication,QTableWidgetItem,QTextEdit,QTextBrowser,QTabWidget,QMenuBar,QMenu,QAction,QFileDialog,QPlainTextEdit)
-from PyQt5.QtCore import QEvent 
-from PyQt5 import QtCore
 from Trie.Trie import Trie
 
-class CodeEditor(QPlainTextEdit):
-    def keyPressEvent(self, event):
-        #print(self.searchingWord)
-        if(event.key()):
-            print(event.text()) 
-        super(CodeEditor, self).keyPressEvent(event)
 
-class basicWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.currentTab = None
-        self.tabNumber=1
-        grid_layout = QGridLayout()
-        self.setLayout(grid_layout)
-        self.setFixedSize(1200,800)
-        self.setWindowTitle('MY Compiler')
-        self.arrayOfTabs=[]
-        self.setStyleSheet("font-size: 18px")
-        self.trie = Trie()
-        self.searchingWord = ""
-        #self.installEventFilter(self)
 
+
+class CompilerLayout(Screen):
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.compiler = Compiler()
-        
+        self.numberOfToken = Label(text="#")
+        self.firstColName = Label(text="Token Name ")
+        self.secondColName = Label(text="Token Value")
+        self.trie = Trie()
+    def run(self,superRoot):
+        count = 0
+        self.ids.suggestions.dismiss()
+        parserResponse = self.compiler.compile(self.ids.tinyCode.text)
+        self.ids.tinyCode.suggestion_text = "Hello"
+        app = App.get_running_app()
+        app.goCButton.disabled = False
+        if(parserResponse == False):
+            self.showError_Popup(parserError=parserResponse)
 
-
-        self.bottomTabWidget= QTabWidget()
-
-        self.tabWidget = QTabWidget()
-        self.tabWidget.setStyleSheet("QTextEdit{font-size:22px}")
-        
-        self.maintab = CodeEditor() #Tab 1 in editor
-        self.tabWidget.addTab(self.maintab,"TAB1")
-        self.arrayOfTabs.append(self.maintab)
-       
-
-       
-       
-
-        self.errorTab = QTextBrowser()
-        self.errorTab.setStyleSheet("color: red;" "background-color: black;" "font-size:20px")
-
-        self.pythonCode = QTextBrowser()
-        self.pythonCode.setStyleSheet("color: green;" "background-color: black;" "font-size:20px")
-       
-        self.tokenTab = QTableWidget()
-        self.tokenTab.setStyleSheet("QTableWidgetItem{font-size:18px; color:black}") 
-        self.tokenTab.insertColumn(self.tokenTab.columnCount())
-        self.tokenTab.insertColumn(self.tokenTab.columnCount())
-        self.tokenTab.setHorizontalHeaderLabels(['Token Item', 'Token Value' ])
-        self.bottomTabWidget.addTab(self.errorTab, 'Errors')
-        self.bottomTabWidget.addTab(self.tokenTab,'Tokens')
-
+        pythonGeneratedCode = self.compiler.parser.getPythonCode()
+        app.pythonCode =  app.cTextInput.text = pythonGeneratedCode
 
         
-
-        menubar= QMenuBar()
-        file_menu = menubar.addMenu('File')
-        edit_menu = menubar.addMenu('Edit')
-        run_menu = menubar.addMenu('Run')
-       
-        exit_action = QAction('&Exit', grid_layout)
-        exit_action.setShortcut('Ctrl+Q')
-        exit_action.triggered.connect(exit)
+        app.table.clear_widgets()
+        app.table.add_widget(self.numberOfToken)
+        app.table.add_widget(self.firstColName)
+        app.table.add_widget(self.secondColName)
+        for token in self.compiler.s.getTokensList():
+            tokenNum = TextInput(text=str(count+1),disabled=True,size=(100,100),size_hint=(0.3,1))
+            tname = TextInput(text=str(token.value),disabled=True,size=(100,100),size_hint=(1,1))
+            tval = TextInput(text=str(token.type.name),disabled=True,size=(100,100),size_hint=(0.3,1))
+            app.table.add_widget(tokenNum)
+            app.table.add_widget(tname)
+            app.table.add_widget(tval)
+            count = count +1 
+            
+        superRoot.root.current = "tableScreen"
+        self.manager.transition.direction = "left"
+    
+    def configAutoComplete(self):
+        app = App.get_running_app()
         
-        save_action = QAction('&Save File',grid_layout)
-        save_action.setShortcut('Ctrl+S')
-        save_action.setStatusTip('Save File')
-        save_action.triggered.connect(self.file_save)
-
-        open_tab = QAction('&New Tab',grid_layout)
-        open_tab.setShortcut('Ctrl+U')
-        open_tab.setStatusTip('Open New Tab')
-        open_tab.triggered.connect(self.new_Tab)
-
-        open_newFile = QAction('&Open File',grid_layout)
-        open_newFile.setShortcut('Ctrl+O')
-        open_newFile.setStatusTip('Open File')
-        open_newFile.triggered.connect(self.open_file)
-
-
+        #self.ids.suggestions.is_open = False
+        if(self.ids.tinyCode.text != ""):
+            app.searchingWord = self.ids.tinyCode.text.split()[-1]
+            suggestions = self.trie.autoComplete(app.searchingWord)
+            self.ids.suggestions.text = suggestions[0]
+            self.ids.suggestions.values = suggestions[1:]
+            if( len(suggestions)>1):
+                self.ids.suggestions.is_open = True
+            #self.ids.suggestions.open(self.ids.tinyCode)  
         
-        file_menu.addAction(save_action)
-        file_menu.addAction(open_newFile)
-        file_menu.addAction(open_tab)
-        file_menu.addAction(exit_action) 
-
-        #Finished File Menu
-
-
-        #Run menu starts
-
-        run_action= QAction('&Run',grid_layout)
-        run_action.setShortcut('Ctrl+R')
-        run_action.setStatusTip('Run File')
-        run_action.triggered.connect(self.run_file)
-
-        tokenPreview_action =  QAction('&Show Tokens',grid_layout)
-        tokenPreview_action.setShortcut('Ctrl+T')
-        tokenPreview_action.setStatusTip('Show Tokens Table')
-        tokenPreview_action.triggered.connect(self.show_tokens)
-
-        run_menu.addAction(run_action)
-        run_menu.addAction(tokenPreview_action)
+    def showError_Popup(self,parserError, scannerError):
+        show = P() 
+        popupWindow = Popup(title="Error", content=show, size_hint=(None,None),size=(400,400)) 
+        app = App.get_running_app()
+        if(scannerError ):
+            app.cError.text = "Scanner Error"
+        elif(parserError):
+            app.goCButton.disabled = True
+            app.cError.text = "Parser Error"
+        popupWindow.open() 
         
-        
-        
-
-        grid_layout.addWidget(self.tabWidget,1,0,1,1)    
-        grid_layout.addWidget(self.bottomTabWidget,2,0,2,1)
-        grid_layout.addWidget(menubar,0,0,1,1) 
+class TokenTable(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        Clock.schedule_once(self.assign)
+    
+    def assign(self,dt):
+        app = App.get_running_app()
+        app.table = self.ids.tableLayout
+        app.goCButton = self.ids.goToC
     
     
 
-       
 
-    def file_save(self):
-        name = QFileDialog.getSaveFileName(self,'Save File','/','.txt')[0] 
-        file = open(name,'w')
-        tabnumber=self.tabWidget.currentIndex()
-        text = self.arrayOfTabs[tabnumber].toPlainText()
-        file.write(text)
-        file.close()
+class P(BoxLayout):
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        app = App.get_running_app()
+        app.cError = self.ids.errorLabel
+class Code(Screen):
     
-    def open_file(self):
-        fileName = QFileDialog.getOpenFileName()
-        file = fileName[0]
-        
-        with open(file,"r") as f:
-            text = f.readline()
-            self.arrayOfTabs[self.tabWidget.currentIndex()].setText(text)
-    
-    def keyPressEvent(self, qKeyEvent):
-        if(qKeyEvent.text() == " "):
-            self.searchingWord = ""
-        else:
-            self.searchingWord += qKeyEvent.text()
-       
-    
-    # def keyPressEvent(self, event):
-    #     print("Inside event filter")
-        
-
-        
+    def __init__(self, **kw):
+        super(Code,self).__init__(**kw)
+        Clock.schedule_once(self.assign)
+    def assign(self,dt):
+        app = App.get_running_app()
+        app.cTextInput = self.ids.cTextInput
+    def copy(self):
+        app = App.get_running_app()
+        pyperclip.copy(app.pythonCode)
+class WindowManager(ScreenManager):
+    pass
+kv = Builder.load_file('compilerlayout.kv')
 
 
-    
-    
-    def new_Tab(self):
-        self.tabNumber=self.tabNumber+1
-        self.currentTab = QTextEdit(self)
-        print(self.currentTab)
-        #self.currentTab.installEventFilter(self)
-        #temptextEdit.keyPressEvent = self.keyPressEvent
-        self.arrayOfTabs.append(self.currentTab)
+class MyApp(App): # <- Main Class
+    code:str = ''
 
-        tabnumber= "Tab {tabNum}".format(tabNum=self.tabNumber)
-        self.tabWidget.addTab(self.arrayOfTabs[-1],tabnumber)
-        self.update()
+    def build(self):
+        self.title = 'APE Charm'
+        return kv
 
-
-    def run_file(self):
-        print(self.tabNumber-1)
-        code = self.arrayOfTabs[self.tabNumber-1].toPlainText()
-        #print(code)
-        self.compiler.compile(code)
-        #self.new_Tab()
-        #self.arrayOfTabs[self.tabNumber-1].setPlainText(self.compiler.parser.getPythonCode())
-        self.bottomTabWidget.addTab(self.pythonCode, 'Generated Code')
-        self.pythonCode.append(self.compiler.parser.getPythonCode())
-    
-
-
-
-
-
-    def show_tokens(self):
-
-        row_count = self.tokenTab.rowCount()        
-        self.tokenTab.insertRow(row_count)
-        self.tokenTab.setItem(row_count,0,QTableWidgetItem("Row {num}".format(num=row_count)))
-        
-
-    
-        
-        
-        
-        
-    
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    windowExample = basicWindow()
-    windowExample.show()
-    sys.exit(app.exec_())
+if __name__ == "__main__":
+    MyApp().run()

@@ -86,7 +86,9 @@ class Parser:
             
             
     def parse(self):
-        self.Program()
+        if(self.Program()):
+            return True
+        return False
 
    
     
