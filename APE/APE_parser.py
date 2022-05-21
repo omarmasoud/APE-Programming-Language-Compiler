@@ -1,5 +1,6 @@
 
 
+from turtle import right
 from APE.settings import TokensTypes as Types
 #from anytree import Node,RenderTree,DoubleStyle,AsciiStyle,AbstractStyle
 
@@ -105,7 +106,7 @@ class Parser:
         if(self.peek("when",checkbyValue=True) or self.peek("within",checkbyValue=True)):
             return self.loopStmt(isClass,afterInit)
         if(self.peek("routine", checkbyValue=True)):
-            return self.funcDef(isClass)
+            return self.funcDef(isClass,afterInit)
         if(self.peek("familyof",checkbyValue=True)):
             return self.classDef()
         if(self.peek("return",checkbyValue=True)):
@@ -165,11 +166,14 @@ class Parser:
 
 
         ####---------------------IDENTIFIER------------------------------------------------
-    def identifier(self,isClass=False,afterInit=False):
+    def identifier(self,isClass=False,afterInit=False,rightSide=False):
         if(self.peek(Types.identifier)):
             if isClass and not afterInit:
-                self.pythonLines += 'self.'+ self.currentToken.value
-                self.classVariables[self.curClass].append(self.currentToken.value)
+                if rightSide:
+                    self.pythonLines += self.currentToken.value
+                else:
+                    self.pythonLines += 'self.'+ self.currentToken.value
+                    self.classVariables[self.curClass].append(self.currentToken.value)
             elif isClass and afterInit and self.currentToken.value in self.classVariables[self.curClass]:
                 self.pythonLines += 'self.'+ self.currentToken.value
             else:
@@ -253,7 +257,7 @@ class Parser:
 
         ###----------------------------------------------------------------------------------
     ###-------------------------------EXPRESSIONS---------------------------------------------------    
-    def exp(self,isClass=False,afterInit=False):
+    def exp(self,isClass=False,afterInit=False,rightSide=False):
         if(self.peek(Types.string)):
 
             self.pythonLines +=  self.currentToken.value 
@@ -261,11 +265,11 @@ class Parser:
             return True
         else:
 
-            return self.explow(isClass,afterInit)
+            return self.explow(isClass,afterInit,rightSide)
 
 
-    def explow(self,isClass=False,afterInit=False):
-        if(self.explowlow(isClass,afterInit)):
+    def explow(self,isClass=False,afterInit=False,rightSide=False):
+        if(self.explowlow(isClass,afterInit,rightSide)):
             while(self.peek(Types.logical_operator)):
                 self.logicalOp()
                 self.explowlow(isClass,afterInit)
@@ -275,8 +279,8 @@ class Parser:
 
 
 
-    def explowlow(self,isClass=False,afterInit=False):
-        if(self.simpleExp(isClass,afterInit)):
+    def explowlow(self,isClass=False,afterInit=False,rightSide=False):
+        if(self.simpleExp(isClass,afterInit,rightSide)):
             #print("CURRENT VALUE: ")
             #print(self.currentToken.value)
             while(self.checkforComparisonOp()):
@@ -290,8 +294,8 @@ class Parser:
 
 
 
-    def simpleExp(self,isClass=False,afterInit=False):
-        if(self.term(isClass,afterInit)):
+    def simpleExp(self,isClass=False,afterInit=False,rightSide=False):
+        if(self.term(isClass,afterInit,rightSide)):
 
             while(self.peek(Types.additionoperator) or self.peek(Types.subtractionoperator)):
                 self.additionOp()
@@ -300,22 +304,22 @@ class Parser:
         return False
 
 
-    def term(self,isClass=False,afterInit=False):
-        if(self.primaryExpr(isClass,afterInit)):
+    def term(self,isClass=False,afterInit=False,rightSide=False):
+        if(self.primaryExpr(isClass,afterInit,rightSide)):
             while(self.peek(Types.multiplicationoperator) or self.peek(Types.divisionoperator)):
                 self.multiplicationOp()
                 self.primaryExpr(isClass,afterInit)
             return True
         return False
 
-    def primaryExpr(self,isClass=False,afterInit=False):
+    def primaryExpr(self,isClass=False,afterInit=False,rightSide=False):
         if(self.peek(Types.number)):
             self.pythonLines += self.currentToken.value
 
             self.match(Types.number)
             return True
         
-        elif(self.identifier(isClass,afterInit)):
+        elif(self.identifier(isClass,afterInit,rightSide)):
             
             return True
         elif(self.peek(Types.leftbracket)):
@@ -347,7 +351,7 @@ class Parser:
                     self.funcCall(isClass,afterInit)
                     self.pythonLines += "\n"
                     return True
-                elif(self.exp(isClass,afterInit) or self.obj()):
+                elif(self.exp(isClass,afterInit,True) or self.obj()):
                     self.pythonLines += "\n"
                     return True
                 self.pythonLines += "\n"
@@ -493,7 +497,7 @@ class Parser:
             return True
         return False
     
-    def funcDef(self, isClass = False):
+    def funcDef(self, isClass = False,afterInit=False):
         self.pythonLines += self.getTabsString()
         if(self.peek("routine",checkbyValue=True)):
             self.pythonLines += "def "
@@ -510,7 +514,7 @@ class Parser:
                     self.pythonLines += self.currentToken.value
                     self.match(Types.rightbracket)
                     self.pythonLines += ":\n"
-                    self.matchstmtseq(isClass)
+                    self.matchstmtseq(isClass,)
                 else:
                     self.pythonLines += self.currentToken.value
                     self.match(Types.identifier)
