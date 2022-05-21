@@ -1,0 +1,34 @@
+familyof Person {
+
+	routine init(Name)
+ {
+		name := Name;
+ };
+
+	routine getName()
+{
+		return name;
+};
+
+routine isEmployee(){
+return False;
+
+};
+};
+
+
+
+familyof Employee inherit Person 
+{
+
+	routine isEmployee()
+		{
+			return True;
+		};
+};
+
+
+emp := new Person("Ahmed");
+panic(emp.getName());
+emp2 := new Employee("Mohamed");
+panic(emp2.getName());

@@ -107,7 +107,9 @@ class CompilerLayout(Screen):
             
         superRoot.root.current = "tableScreen"
         self.manager.transition.direction = "left"
-        app.execTextInput.text = str((os.popen("python outputs/output1.py").read()))
+    
+        #app.execTextInput.text = str((os.popen("python outputs/output1.py").read()))
+        
 
 
         
@@ -191,6 +193,11 @@ class Code(Screen):
     def copy(self):
         app = App.get_running_app()
         pyperclip.copy(app.pythonCode)
+
+    def execThisFile(self):
+        app = App.get_running_app()
+        app.execTextInput.text = str((os.popen("python outputs/output1.py").read()))
+        self.manager.current = "execution"
     
 class Execution(Screen):
     

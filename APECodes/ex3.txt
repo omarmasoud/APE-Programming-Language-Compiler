@@ -1,0 +1,23 @@
+familyof obj{
+
+routine init(){
+x:=10;
+y:=5;
+panic("aloo:");
+};
+routine derive(x,y){
+return x/y;
+};
+};
+
+familyof objdescent inherit obj{
+	routine callparent(){
+
+		panic("parent not called");
+		};
+
+	};
+
+o:=new objdescent();
+o.derive(2,4);
+o.callparent();

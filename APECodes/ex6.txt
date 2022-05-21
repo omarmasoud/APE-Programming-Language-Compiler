@@ -1,0 +1,23 @@
+routine drawPyramid(n){
+	s := "";
+	star := "*";
+	nextline := "\n";
+    i := 0; 
+    when (i <= n)
+    do{
+        j := 1;
+        when(j <= i)
+        do{
+            s := s + star;
+			j:= j+1;
+        };
+		
+        s := s + nextline;
+		i := i + 1;		
+    };
+	panic(s);
+	
+        
+};
+
+drawPyramid(10);

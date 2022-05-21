@@ -1,0 +1,6 @@
+x:=1;
+when(x<10)
+do {
+x:=x+1;
+panic("Hello all");
+};

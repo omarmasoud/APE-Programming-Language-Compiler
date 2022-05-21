@@ -1,0 +1,7 @@
+routine add(x,y) {
+
+return x+y;
+
+};
+f = add(3,5);
+panic(f);

@@ -178,9 +178,7 @@ WindowManager:
                 text: "Execution"
                 size_hint: 1, 1
                 #pos_hint: {"x":1, "y":0.1}
-                on_press: 
-                    app.root.current = "execution"
-                    root.manager.transition.direction = "left"
+                on_press: root.execThisFile()
             Button:
                 text: "Exit"
                 size_hint: 1, 1

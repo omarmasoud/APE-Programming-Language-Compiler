@@ -1,0 +1,24 @@
+familyof Animal {
+    routine talk(){
+        panic("Talking")
+    };
+};
+
+familyof Dog inherit Animal {
+    routine talk(){
+        panic("howhowhow");
+    };
+};
+
+familyof Cat inherit Animal {
+    routine talk(){
+        panic("meowmeowmoew");
+    };
+};
+
+
+animal1 := new Dog();
+animal2 := new Cat();
+
+animal1.talk();
+animal2.talk();
