@@ -45,6 +45,7 @@ class Editor(CodeInput):
 
     def keyboard_on_key_down(self, window, keycode, text, modifiers):
         comp = self.parent.parent.parent
+        print(comp)
         if keycode[0] in self.interesting_keys:
             if keycode[1] == 'enter':
                 print('yoooo')
