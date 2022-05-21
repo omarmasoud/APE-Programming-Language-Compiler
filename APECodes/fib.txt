@@ -1,0 +1,10 @@
+routine fib(number){
+
+    if((number = 0) or (number = 1)){
+        return number;
+    };
+    num1 := fib(number-1);
+    num2 := fib(number-2);
+    return num1 + num2 ;
+};
+panic(fib(10));

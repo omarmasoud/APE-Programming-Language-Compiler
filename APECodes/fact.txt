@@ -1,0 +1,10 @@
+routine fact(number){
+    res := 1;
+    when(number > 0) do{
+        res := res * number;
+        number := number - 1 ;
+    };
+    return res ;
+};
+
+panic(fact(10));
