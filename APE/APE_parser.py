@@ -1,6 +1,6 @@
 
 
-from settings import TokensTypes as Types
+from APE.settings import TokensTypes as Types
 #from anytree import Node,RenderTree,DoubleStyle,AsciiStyle,AbstractStyle
 
 
@@ -22,13 +22,13 @@ class Parser:
         return self.currentToken.type == tokenType
 
     def checkCurrentTokenByVal(self, tokenVal):
-       return self.currentToken.value == tokenVal
+       return self.currentToken.value.lower() == tokenVal
 
     def checkNextTokenByType(self, tokenType):
         return self.nextToken.type == tokenType
 
     def checkNextTokenByVal(self, tokenVal):
-       return self.nextToken.value == tokenVal
+       return self.nextToken.value.lower() == tokenVal
 
     def getTabsString(self):
         a = ""
@@ -43,13 +43,13 @@ class Parser:
             # matched or not ?
             if(checkbyValue):
                 if(self.checkCurrentTokenByVal(foundVal)):
-                    print("\nDone Parsing {}".format(self.currentToken.value))
+                    #print("\nDone Parsing {}".format(self.currentToken.value))
                     self.stepOneToken()
                 else:
                     raise ValueError('TokenType Mismatch', self.currentToken)
             else:
                 if(self.checkCurrentTokenByType(foundVal)):
-                    print("Done Parsing {}".format(self.currentToken.value))
+                    #print("Done Parsing {}".format(self.currentToken.value))
                     self.stepOneToken()
                 else:
                 
@@ -339,7 +339,11 @@ class Parser:
          
                 self.pythonLines += "="
                 self.match(Types.assignmentoperator)
-                if(self.exp() or self.obj()):
+                if(self.peek(Types.identifier) and self.peekNext(Types.leftbracket)):
+                    self.funcCall()
+                    self.pythonLines += "\n"
+                    return True
+                elif(self.exp() or self.obj()):
                     self.pythonLines += "\n"
                     return True
                 self.pythonLines += "\n"
@@ -387,7 +391,13 @@ class Parser:
         if(self.peek(Types.leftbracket)):
             self.pythonLines += self.currentToken.value
             self.match(Types.leftbracket)
-            if(self.exp()):
+            if(self.peek(Types.identifier) and self.peekNext(Types.leftbracket)):
+                self.funcCall()
+                self.pythonLines += self.currentToken.value
+                self.match(Types.rightbracket)
+                self.pythonLines += "\n"
+                return True
+            elif(self.exp()):
                 self.pythonLines += self.currentToken.value
                 self.match(Types.rightbracket)
                 self.pythonLines += "\n"
@@ -446,15 +456,15 @@ class Parser:
                     break
                     
             endLine = self.pythonLines[condLine+1:]
-            print("Endline : \n {}".format(endLine))
-            print("Before reassign :  \n {}".format(self.pythonLines[:condLine+1]))
+            #print("Endline : \n {}".format(endLine))
+            #print("Before reassign :  \n {}".format(self.pythonLines[:condLine+1]))
             self.pythonLines = self.pythonLines[:condLine+1]
             
             
             self.match(Types.semicolon)
             self.match(Types.rightbracket)
             self.match(Types.leftcurlybracket)
-            print("TABS : {}".format(self.tabsNumber))
+            #print("TABS : {}".format(self.tabsNumber))
             
             if(self.StatementSequence()):
                 self.pythonLines += self.getTabsString()

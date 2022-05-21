@@ -1,9 +1,9 @@
 from email import parser
 from unittest import TestCase
-from APEScanner import *
-from APE_parser import Parser
-from APE_Compiler import Compiler
-from APEScanner import scanner
+from APE.APEScanner import *
+from APE.APE_parser import Parser
+from APE.APE_Compiler import Compiler
+from APE.APEScanner import scanner
 
 
 import subprocess
@@ -20,8 +20,7 @@ testcase2 = "x:=1; when(x<10) do {x:=x+1; panic(\"hello ya shabab\");}; "
 testcae4 = "hello.length.width"
 testcase3 = "familyof math{routine init(number1,number2) {number1 := number1; number2 := number2;}; routine setNum1(num1){number1 := num1;};routine setNum2(num2){number2 := num2;}; routine getnum1(num1){return number1;}; routine exec(x){if(x>10){panic(\"x is greater then 10\");}; when(x<10)do{x:=x+1; listen(y); panic(y);}; };}; mat:= new math(1,2); mat.exec(12)"
 c = Compiler()
-c.compile()
-subprocess.call('output.py',shell=True)
+c.compile(testcase2)
 
 
 

@@ -4,6 +4,7 @@ WindowManager:
     CompilerLayout:
     Code:
     TokenTable:
+    Execution:
 <P>:
     BoxLayout:
         orientation:"vertical"
@@ -65,7 +66,7 @@ WindowManager:
                     root.manager.transition.direction = "right"
             Button:
                 id:goToC
-                text: "C code"
+                text: "Python Code"
                 size_hint: 1, 1
                 #pos_hint: {"x":1, "y":0.1}
                 on_press: 
@@ -103,7 +104,7 @@ WindowManager:
                 background_color:0,2,0,1
                 Image:
                     pos_hint_y : None
-                    source: 'play.png'
+                    source: 'assets/play.png'
                     center_y: (self.parent.y + self.parent.height/2)
                     center_x: self.parent.x + self.parent.width/2
                     size: 20,20
@@ -121,7 +122,7 @@ WindowManager:
                 
             
 <Editor>:
-    id: tinyCode
+    id:tinyCode
     pos_hint:{"x":0,"y":0.9}
     size_hint:(1,0.8)
     multiline:True
@@ -131,7 +132,7 @@ WindowManager:
     #on_text: root.configAutoComplete()
     #on_focus: root.getKeyBoard()                    
 <Code>:
-    name:"code"
+    name:'code'
     canvas: 
         Color:
             rgba: 0.5, 0.5, 0.5, 0.5
@@ -146,15 +147,15 @@ WindowManager:
         id:preC
         Label:
             id:cLabel
-            text: "C code: "
+            text: "Python code: "
             size_hint: (1,0.1)
             pos_hint:{'top':1}
-        TextInput:
+        Editor:
             #pos_hint:{"x":0,"y":0.9}
             id:cTextInput
             size_hint:(1,0.9)
             text:"Code here sample ..."
-            disabled:True
+            disabled:False
             multiline:True
             padding:20
         BoxLayout:
@@ -173,6 +174,69 @@ WindowManager:
                 #pos_hint: {"x":1, "y":0.1}
                 on_press: 
                     root.copy()
+            Button:
+                text: "Execution"
+                size_hint: 1, 1
+                #pos_hint: {"x":1, "y":0.1}
+                on_press: 
+                    app.root.current = "execution"
+                    root.manager.transition.direction = "left"
+            Button:
+                text: "Exit"
+                size_hint: 1, 1
+                #pos_hint: {"x":1, "y":0.1}
+                on_press: 
+                    app.get_running_app().stop()
+
+<Execution>:
+    name:'execution'
+    canvas: 
+        Color:
+            rgba: 0.5, 0.5, 0.5, 0.5
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    BoxLayout:
+        orientation: 'vertical'
+        size:root.width,root.height
+        padding:'10dp'
+        spacing:5
+        id:preExec
+        Label:
+            id:execLabel
+            text: "Output:"
+            size_hint: (1,0.1)
+            pos_hint:{'top':1}
+        Editor:
+            #pos_hint:{"x":0,"y":0.9}
+            id:execTextInput
+            size_hint:(1,0.9)
+            text:"Code here sample ..."
+            disabled:False
+            multiline:True
+            padding:20
+        BoxLayout:
+            size_hint: 1, 0.1
+            orientation:'horizontal'    
+            Button:
+                text: "Back Python Code"
+                size_hint: 1, 1
+                #pos_hint: {"x":1, "y":0.1}
+                on_press: 
+                    app.root.current = "code"
+                    root.manager.transition.direction = "right"
+            Button:
+                text: "Previous Ape"
+                size_hint: 1, 1
+                #pos_hint: {"x":1, "y":0.1}
+                on_press: 
+                    app.root.current = "compiler"
+                    root.manager.transition.direction = "right"
+            Button:
+                text: "New Ape"
+                size_hint: 1, 1
+                #pos_hint: {"x":1, "y":0.1}
+                on_press:root.newApe()
             Button:
                 text: "Exit"
                 size_hint: 1, 1

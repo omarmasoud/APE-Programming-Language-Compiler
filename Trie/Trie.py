@@ -6,7 +6,7 @@ keywords = [
         "elseif",
         "return",
         "familyof",
-        "inherir",
+        "inherit",
         "panic",
         "listen",
         "routine",
@@ -65,7 +65,7 @@ class Trie:
 
     def addAll(self):
         for keyword in keywords:
-            print(keyword)
+            #print(keyword)
             self.add(keyword)
 
 if __name__ == "__main__":

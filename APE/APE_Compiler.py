@@ -1,6 +1,6 @@
-from APE_parser import Parser
-from APEScanner import scanner,Token
-import settings
+from APE.APE_parser import Parser
+from APE.APEScanner import scanner,Token
+import APE.settings as settings
 
 class Compiler:
     def __init__(self):
@@ -22,12 +22,22 @@ class Compiler:
         tokens.append(t)
         self.parser = Parser(tokens)
         self.parser.parse()
-        with open('output{}.py'.format(self.fileCounter),'w') as f:
+        with open('./outputs/output1.py','w') as f:
             self.fileCounter += 1
             f.write(self.parser.pythonLines)
         
 
 
+# test= """
+# routine add(x,y) {
 
+# return x+y;
 
+# };
+
+# m := x+y;
+
+# """
+# c = Compiler()
+# c.compile(test)
 

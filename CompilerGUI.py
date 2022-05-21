@@ -1,9 +1,13 @@
 from logging import disable
 from kivy.config import Config
+
+from APE.APELexer import ApeLexer
 Config.set('kivy','window_icon','hacking.png')
 from os import error
+import os
 from typing import Text
 import kivy
+import subprocess
 from kivy.app import App
 from kivy.core import text
 from kivy.core.window import Window
@@ -20,16 +24,24 @@ from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import ScreenManager, Screen
 import pyperclip
 from kivy.clock import Clock
-from APE_Compiler import Compiler
+from APE.APE_Compiler import Compiler
 from Trie.Trie import Trie
+from kivy.uix.codeinput import CodeInput
+from APE.APELexer import ApeLexer
+from pygments import lexers
 
 
-class Editor(TextInput):
+
+class Editor(CodeInput):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(Editor,self).__init__(**kwargs)
+        self.lexer = ApeLexer()
+        
         self.curText = []
         self.lastWord = ''
         self.startIndex = 0
+    def setmylexer(self):
+        self.lexer = ApeLexer()
 
     def keyboard_on_key_down(self, window, keycode, text, modifiers):
         comp = self.parent.parent.parent
@@ -40,6 +52,8 @@ class Editor(TextInput):
             self.lastWord = ''
         elif  keycode[1] != 'spacebar' and keycode[1] != 'tab' and keycode[1] != '.' :
             self.lastWord += keycode[1]
+            app = App.get_running_app()
+            app.searchingWord = self.lastWord
             comp.configAutoComplete(self.lastWord)
         else:
             comp.trie.add(self.lastWord)
@@ -64,19 +78,15 @@ class CompilerLayout(Screen):
     def run(self,superRoot):
         count = 0
         app = App.get_running_app()
-        #self.ids.suggestions.dismiss()
-        
+        app.cTextInput.lexer = lexers.PythonLexer()
         app.goCButton.disabled = False
+        app.edit = self.ids.edit
         try:
             print(self.ids.edit.text)
             self.compiler.compile(self.ids.edit.text)
         except (ValueError,SyntaxError,Exception) as e:
              self.showError_Popup(str(e))
-        #self.ids.tinyCode.suggestion_text = "Hello"
         
-        #app.goCButton.disabled = False
-        # if(parserResponse == False):
-        #     self.showError_Popup(parserError=parserResponse)
        
         pythonGeneratedCode = self.compiler.parser.getPythonCode()
         app.pythonCode =  app.cTextInput.text = pythonGeneratedCode
@@ -97,13 +107,31 @@ class CompilerLayout(Screen):
             
         superRoot.root.current = "tableScreen"
         self.manager.transition.direction = "left"
+        app.execTextInput.text = str((os.popen("python outputs/output1.py").read()))
+
+
+        
     def buttonHandler(self,button):
-        text = self.ids.edit.text.split()
-        print(text)
-        text = text[:-1]
-        text.append(button.text)
-        self.ids.edit.text = ' '.join(text)
-        self.ids.edit.lastWord = ''
+        app = App.get_running_app()
+        cursor_before = self.ids.edit.cursor
+        word_end = self.ids.edit.cursor_index()-1
+        word_start = word_end - len(app.searchingWord)
+        
+        
+        text = []
+        text.append(self.ids.edit.text[:word_start+1])
+        text.append(self.ids.edit.text[word_start+1:word_end+1])
+        text.append(self.ids.edit.text[word_end+1:])
+
+       
+        text[1] = button.text
+        self.ids.edit.text = text[0] + text[1] + text[2]
+        cursor_after = (cursor_before[0] - len(text[1]) + len(button.text) , cursor_before[1])
+        print(cursor_before)
+        print(cursor_after)
+        self.ids.edit.cursor = cursor_after
+
+        
     def configAutoComplete(self,word):
         
         #self.ids.suggestions.is_open = False
@@ -119,12 +147,7 @@ class CompilerLayout(Screen):
                 button.bind
                 layout.add_widget(button)
             self.ids.suggestions.add_widget(layout )
-            # if len(suggestions)>0: 
-            #     self.ids.suggestions.text = 'auto complete'
-            #     self.ids.suggestions.values = suggestions
-            #     if( len(suggestions)>1):
-            #         self.ids.suggestions.is_open = True
-            # self.ids.suggestions.open(self.ids.tinyCode)  
+            
         
     def showError_Popup(self,error):
         show = P() 
@@ -168,6 +191,23 @@ class Code(Screen):
     def copy(self):
         app = App.get_running_app()
         pyperclip.copy(app.pythonCode)
+    
+class Execution(Screen):
+    
+    def __init__(self, **kw):
+        super(Execution,self).__init__(**kw)
+        Clock.schedule_once(self.assign)
+    def assign(self,dt):
+        app = App.get_running_app()
+        app.execTextInput = self.ids.execTextInput
+        #self.ids.execTextInput.text = str((os.popen("python outputs/output1.py").read()))
+    def newApe(self):
+        app = App.get_running_app()
+        app.edit.text = ""
+        self.manager.current = "compiler"
+
+
+
 
 
 class WindowManager(ScreenManager):

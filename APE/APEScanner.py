@@ -1,6 +1,6 @@
 import enum
 import string
-from settings import TokensTypes
+from APE.settings import TokensTypes
 class scanner:
     def __init__(self) :
         self.__scanningIndex=0
