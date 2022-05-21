@@ -1,6 +1,6 @@
 familyof Animal {
     routine talk(){
-        panic("Talking")
+        panic("Talking");
     };
 };
 
